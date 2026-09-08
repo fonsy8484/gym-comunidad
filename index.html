@@ -1,612 +1,320 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Gym comunidad</title>
+  <meta charset="UTF-8" />
+  <title>Entrenamiento — PPL & Upper/Lower</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <style>
     :root {
-      --bg: #071b27;
-      --card: #123342;
-      --line: #2a596b;
-      --txt: #f1fafc;
-      --muted: #a9c5d0;
-      --green: #35d99d;
-      --red: #ff4d59;
-      --orange: #ffb23e;
-      --body: #557886;
+      --bg: #0b0f14;
+      --card: #121821;
+      --text: #e6eef7;
+      --muted: #9aa7b5;
+      --accent: #3b82f6;
+      --green: #22c55e;
+      --orange: #f59e0b;
+      --red: #ef4444;
+      --border: #1f2937;
     }
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--txt);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg); color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     }
+    a { color: var(--accent); text-decoration: none; }
     header {
-      padding: 32px 20px 16px;
-      background: #071b27;
-      border-bottom: 1px solid var(--line);
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(11,15,20,0.95);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    h1 { margin: 0 0 8px; font-size: 25px; }
-    header p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.4;
+    header h1 {
+      font-size: 18px; margin: 0; font-weight: 600;
     }
-    .legend {
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 13px;
+    .week-selector {
+      display: flex; gap: 8px; align-items: center;
+      font-size: 13px; color: var(--muted);
     }
-    .dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      margin: 0 4px 0 10px;
+    .week-selector button {
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text); padding: 4px 8px; border-radius: 6px;
     }
-    .dot:first-child { margin-left: 0; }
-    .red { background: var(--red); }
-    .orange { background: var(--orange); }
-    .grey { background: var(--body); }
-
-    .tabs {
-      display: flex;
-      gap: 10px;
-      padding: 14px 14px 12px;
-      background: #071b27;
-      border-bottom: 1px solid var(--line);
-      overflow-x: auto;
+    nav.bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(11,15,20,0.95);
+      border-top: 1px solid var(--border);
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      padding: 8px;
     }
-    .tab {
-      white-space: nowrap;
-      border: 1px solid var(--line);
-      background: #102b39;
-      color: var(--muted);
-      border-radius: 28px;
-      padding: 11px 15px;
-      font-weight: 800;
-      font-size: 14px;
+    nav.bottom-nav button {
+      background: transparent; border: none; color: var(--muted);
+      font-size: 12px; padding: 6px; border-radius: 8px;
     }
-    .tab.active {
-      background: var(--green);
-      color: #05251d;
-      border-color: var(--green);
+    nav.bottom-nav button.active {
+      background: var(--card); color: var(--text);
     }
-
     main {
-      padding: 14px 12px 35px;
-      max-width: 700px;
-      margin: auto;
+      padding: 16px;
+      padding-bottom: 80px;
     }
-    .plan { display: none; }
-    .plan.active { display: block; }
-
-    .info {
-      background: #0d2b39;
-      border: 1px solid var(--line);
-      border-radius: 13px;
-      padding: 12px;
-      font-size: 13px;
-      color: #d5eaf0;
-      line-height: 1.4;
-    }
-    .day { margin: 22px 0; }
-    .day h2 { font-size: 19px; margin: 0 0 3px; }
-    .day > p {
-      color: var(--muted);
-      font-size: 13px;
-      margin: 0 0 10px;
-    }
-
-    .exercise {
+    .section { display: none; }
+    .section.active { display: block; }
+    .card {
       background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 15px;
-      padding: 10px;
-      margin: 10px 0;
-      display: flex;
-      gap: 11px;
-      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
     }
-    .figure {
-      flex: 0 0 90px;
-      width: 90px;
-      height: 125px;
-      background: #09232f;
-      border-radius: 11px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .card h2, .card h3 {
+      margin: 0 0 8px 0; font-size: 16px; font-weight: 600;
     }
-    .detail { min-width: 0; flex: 1; }
-    .detail h3 {
-      font-size: 15px;
-      line-height: 1.2;
-      margin: 0 0 4px;
+    .card p { margin: 0; color: var(--muted); font-size: 13px; }
+    .week-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 6px; margin-bottom: 12px;
+    }
+    .day-circle {
+      aspect-ratio: 1; border-radius: 50%;
+      background: var(--bg); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: var(--muted);
+    }
+    .day-circle.completed {
+      background: var(--green); color: #fff; border-color: var(--green);
+    }
+    .day-circle.today {
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    .progress-bar {
+      height: 8px; background: var(--bg);
+      border-radius: 999px; overflow: hidden;
+      margin: 8px 0;
+    }
+    .progress-bar .fill {
+      height: 100%; background: var(--green);
+      width: 0%; transition: width 0.25s ease;
+    }
+    .btn {
+      background: var(--accent); color: #fff;
+      border: none; padding: 8px 12px;
+      border-radius: 8px; font-size: 13px;
+    }
+    .btn.secondary {
+      background: var(--card); color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn.small {
+      padding: 4px 8px; font-size: 12px;
+    }
+    .exercise {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      background: #0f141c;
+    }
+    .exercise-header {
+      display: flex; gap: 10px; align-items: center;
+      margin-bottom: 10px;
+    }
+    .muscle-thumb {
+      width: 64px; height: 64px; border-radius: 8px;
+      background: #0b0f14; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: var(--muted);
+      overflow: hidden;
+    }
+    .muscle-thumb img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .exercise-title {
+      flex: 1;
+    }
+    .exercise-title h3 {
+      margin: 0; font-size: 15px;
+    }
+    .exercise-title p {
+      margin: 2px 0 0 0; font-size: 12px;
     }
     .sets {
-      display: inline-block;
-      background: #075749;
+      display: grid; gap: 8px;
+    }
+    .set-row {
+      display: grid;
+      grid-template-columns: 32px 1fr 1fr 60px 40px;
+      gap: 6px; align-items: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px;
+    }
+    .set-label {
+      font-size: 12px; color: var(--muted);
+      text-align: center;
+    }
+    .set-row input {
+      background: #0b0f14; border: 1px solid var(--border);
+      color: var(--text); border-radius: 6px;
+      padding: 6px; font-size: 13px;
+      width: 100%;
+    }
+    .set-row .check {
+      width: 28px; height: 28px;
+      border-radius: 6px; border: 1px solid var(--border);
+      background: #0b0f14; color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .set-row .check.done {
+      background: var(--green); border-color: var(--green);
+    }
+    .timer {
+      display: flex; gap: 8px; align-items: center;
+      margin-top: 8px;
+    }
+    .timer .time {
+      font-variant-numeric: tabular-nums;
+      font-size: 14px; color: var(--muted);
+    }
+    .note-area {
+      width: 100%; background: #0b0f14;
+      border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px;
+      padding: 6px; font-size: 12px;
+      margin-top: 8px;
+    }
+    .alt-btn {
+      margin-top: 8px;
+      font-size: 12px; color: var(--muted);
+      background: transparent; border: none;
+      padding: 0;
+    }
+    .alt-panel {
+      display: none; margin-top: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 12px; color: var(--muted);
+    }
+    .summary-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .summary-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+    .summary-item .value {
+      font-size: 18px; font-weight: 700;
+    }
+    .summary-item .label {
+      font-size: 11px; color: var(--muted);
+      margin-top: 4px;
+    }
+    .muscle-list {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 6px; margin-top: 8px;
+    }
+    .muscle-row {
+      display: flex; justify-content: space-between;
+      background: var(--card);
+      border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 3px 7px;
+      padding: 6px 8px;
       font-size: 12px;
-      font-weight: 800;
-      margin-bottom: 5px;
     }
-    .muscle {
+    .export-area {
+      margin-top: 12px;
+      display: grid; gap: 8px;
+    }
+    .export-area button {
+      background: var(--card); color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px; border-radius: 8px;
+      font-size: 13px;
+    }
+    .recommendation {
+      margin-top: 8px;
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 8px;
+      padding: 8px;
       font-size: 12px;
-      color: #ffdca9;
-      margin: 2px 0 6px;
+      color: #bfdbfe;
     }
-    .cue {
-      font-size: 12px;
-      color: #d6e9ee;
-      line-height: 1.35;
-      margin: 0 0 8px;
-    }
-    .video {
-      display: inline-block;
-      background: var(--green);
-      color: #05251d;
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 800;
-      padding: 8px 9px;
-      border-radius: 7px;
-    }
-    @media (max-width: 380px) {
-      .exercise { display: block; }
-      .figure {
-        width: 100%;
-        height: 150px;
-        margin-bottom: 9px;
-      }
-    }
+    .hidden { display: none !important; }
   </style>
 </head>
-
 <body>
   <header>
-    <h1>Gym comunidad · Rutinas</h1>
-    <p>Rojo = músculo principal · Naranja = músculo secundario. Pulsa “Ver vídeo” para ver el movimiento real.</p>
-    <div class="legend">
-      <span class="dot red"></span>Principal
-      <span class="dot orange"></span>Secundario
-      <span class="dot grey"></span>Resto del cuerpo
+    <h1 id="headerTitle">Hoy</h1>
+    <div class="week-selector">
+      <button id="prevWeek">◀</button>
+      <span id="weekLabel">Semana</span>
+      <button id="nextWeek">▶</button>
     </div>
   </header>
 
-  <nav class="tabs">
-    <button class="tab active" onclick="showPlan('ppl', this)">Opción A · PPL</button>
-    <button class="tab" onclick="showPlan('upper', this)">Opción B · Upper/Lower</button>
-  </nav>
-
   <main>
-    <section id="ppl" class="plan active">
-      <div class="info">Push / Pull / Legs: entrenas seis días. Domingo: descanso, caminar o movilidad suave.</div>
-
-      <div class="day">
-        <h2>Lunes · Push A</h2>
-        <p>Pecho, hombro y tríceps</p>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#557886"/>
-              <path d="M39 34 Q50 27 61 34 V48 Q50 53 39 48 Z" fill="#ff4d59"/>
-              <ellipse cx="35" cy="37" rx="7" ry="8" fill="#ffb23e"/>
-              <ellipse cx="65" cy="37" rx="7" ry="8" fill="#ffb23e"/>
-              <rect x="24" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="66" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#557886"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#557886"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Press de banca con barra</h3>
-            <span class="sets">3 × 6–10</span>
-            <div class="muscle">🔥 Pecho · tríceps · hombro anterior</div>
-            <p class="cue">Escápulas atrás, pies firmes y barra controlada.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/barbell-bench-press.html">▶ Ver vídeo</a>
-          </div>
-        </div>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#557886"/>
-              <path d="M39 34 Q50 27 61 34 V48 Q50 53 39 48 Z" fill="#ff4d59"/>
-              <ellipse cx="35" cy="37" rx="7" ry="8" fill="#ffb23e"/>
-              <ellipse cx="65" cy="37" rx="7" ry="8" fill="#ffb23e"/>
-              <rect x="24" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="66" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#557886"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#557886"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Press de banca con mancuernas</h3>
-            <span class="sets">3 × 8–12</span>
-            <div class="muscle">🔥 Pecho · tríceps · hombro anterior</div>
-            <p class="cue">Codos a unos 45° y bajada lenta.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/dumbbell-bench-press.html">▶ Ver vídeo</a>
-          </div>
-        </div>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#557886"/>
-              <path d="M39 34 Q50 27 61 34 V48 Q50 53 39 48 Z" fill="#ff4d59"/>
-              <ellipse cx="35" cy="37" rx="7" ry="8" fill="#ffb23e"/>
-              <ellipse cx="65" cy="37" rx="7" ry="8" fill="#ffb23e"/>
-              <rect x="24" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="66" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#557886"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#557886"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Press inclinado con mancuernas</h3>
-            <span class="sets">2 × 8–12</span>
-            <div class="muscle">🔥 Pecho superior · hombro · tríceps</div>
-            <p class="cue">Inclina poco el banco y mantén los hombros abajo.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/incline-dumbbell-bench-press.html">▶ Ver vídeo</a>
-          </div>
-        </div>
+    <!-- SECCION: HOY -->
+    <section id="section-hoy" class="section active">
+      <div class="card">
+        <h2 id="todayTitle">Cargando día...</h2>
+        <p id="todayDesc">Selecciona una rutina abajo</p>
+        <div class="week-grid" id="weekGrid"></div>
+        <div class="progress-bar"><div class="fill" id="todayProgress"></div></div>
+        <p id="todayProgressText" style="font-size:12px;color:var(--muted);margin:4px 0 0 0;">0 series completadas</p>
       </div>
 
-      <div class="day">
-        <h2>Martes · Pull A</h2>
-        <p>Espalda y bíceps</p>
+      <div id="todayExercises"></div>
 
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#ff4d59"/>
-              <rect x="24" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="66" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#557886"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#557886"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Jalón al pecho</h3>
-            <span class="sets">3 × 8–12</span>
-            <div class="muscle">🔥 Dorsal · bíceps</div>
-            <p class="cue">Pecho alto; lleva la barra a la parte alta del pecho.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/wide-grip-pull-down">▶ Ver vídeo</a>
-          </div>
-        </div>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#ff4d59"/>
-              <rect x="24" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="66" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#557886"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#557886"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Remo sentado</h3>
-            <span class="sets">3 × 8–12</span>
-            <div class="muscle">🔥 Espalda media · dorsal · bíceps</div>
-            <p class="cue">Tira hacia el abdomen sin mover el torso.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/seated-row.html">▶ Ver vídeo</a>
-          </div>
-        </div>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#ff4d59"/>
-              <rect x="24" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="66" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#557886"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#557886"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Remo a una mano con mancuerna</h3>
-            <span class="sets">3 × 8–12 por lado</span>
-            <div class="muscle">🔥 Espalda · bíceps</div>
-            <p class="cue">Codo hacia la cadera y espalda neutra.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/one-arm-dumbbell-row.html">▶ Ver vídeo</a>
-          </div>
-        </div>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#557886"/>
-              <ellipse cx="35" cy="37" rx="7" ry="8" fill="#ff4d59"/>
-              <ellipse cx="65" cy="37" rx="7" ry="8" fill="#ff4d59"/>
-              <rect x="24" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="66" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#557886"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#557886"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Face pull en polea</h3>
-            <span class="sets">2–3 × 12–20</span>
-            <div class="muscle">🔥 Hombro posterior · espalda alta</div>
-            <p class="cue">Tira hacia nariz/frente con los codos altos.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/cable-face-pull">▶ Ver vídeo</a>
-          </div>
-        </div>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#557886"/>
-              <rect x="24" y="43" width="10" height="42" rx="5" fill="#ff4d59"/>
-              <rect x="66" y="43" width="10" height="42" rx="5" fill="#ff4d59"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#557886"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#557886"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Curl predicador</h3>
-            <span class="sets">3 × 10–12</span>
-            <div class="muscle">🔥 Bíceps</div>
-            <p class="cue">Brazo apoyado; baja lento y sin golpe final.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/dumbbell-preacher-curl.html">▶ Ver vídeo</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="day">
-        <h2>Miércoles · Legs A</h2>
-        <p>Cuádriceps, glúteo y gemelo</p>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#557886"/>
-              <ellipse cx="42" cy="70" rx="8" ry="7" fill="#ffb23e"/>
-              <ellipse cx="58" cy="70" rx="8" ry="7" fill="#ffb23e"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#ff4d59"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#ff4d59"/>
-              <rect x="38" y="109" width="10" height="25" rx="5" fill="#557886"/>
-              <rect x="52" y="109" width="10" height="25" rx="5" fill="#557886"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Sentadilla con barra</h3>
-            <span class="sets">3 × 6–10</span>
-            <div class="muscle">🔥 Cuádriceps · glúteos</div>
-            <p class="cue">Abdomen firme; rodillas alineadas con los pies.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/squat.html">▶ Ver vídeo</a>
-          </div>
-        </div>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#557886"/>
-              <ellipse cx="42" cy="70" rx="8" ry="7" fill="#ffb23e"/>
-              <ellipse cx="58" cy="70" rx="8" ry="7" fill="#ffb23e"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#ff4d59"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#ff4d59"/>
-              <rect x="38" y="109" width="10" height="25" rx="5" fill="#557886"/>
-              <rect x="52" y="109" width="10" height="25" rx="5" fill="#557886"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Sentadilla búlgara con mancuernas</h3>
-            <span class="sets">3 × 8–12 por pierna</span>
-            <div class="muscle">🔥 Cuádriceps · glúteos</div>
-            <p class="cue">Pie trasero en banco y bajada controlada.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/one-leg-dumbbell-squat-aka-bulgarian-squat.html">▶ Ver vídeo</a>
-          </div>
-        </div>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#557886"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#ff4d59"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#ff4d59"/>
-              <rect x="38" y="109" width="10" height="25" rx="5" fill="#557886"/>
-              <rect x="52" y="109" width="10" height="25" rx="5" fill="#557886"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Extensión de cuádriceps</h3>
-            <span class="sets">3 × 10–15</span>
-            <div class="muscle">🔥 Cuádriceps</div>
-            <p class="cue">No rebotes; aprieta arriba un segundo.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/leg-extension.html">▶ Ver vídeo</a>
-          </div>
-        </div>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#557886"/>
-              <ellipse cx="42" cy="70" rx="8" ry="7" fill="#ff4d59"/>
-              <ellipse cx="58" cy="70" rx="8" ry="7" fill="#ff4d59"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#ff4d59"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#ff4d59"/>
-              <rect x="38" y="109" width="10" height="25" rx="5" fill="#557886"/>
-              <rect x="52" y="109" width="10" height="25" rx="5" fill="#557886"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Peso muerto rumano con barra</h3>
-            <span class="sets">3 × 8–12</span>
-            <div class="muscle">🔥 Femoral · glúteos</div>
-            <p class="cue">Cadera atrás, espalda neutra y barra cerca de las piernas.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/romanian-deadlift">▶ Ver vídeo</a>
-          </div>
+      <div class="card">
+        <h3>Descanso</h3>
+        <div class="timer">
+          <button class="btn small" id="startTimer90">90 s</button>
+          <button class="btn small" id="startTimer120">120 s</button>
+          <span class="time" id="timerDisplay">00:00</span>
+          <button class="btn small secondary" id="resetTimer">Reiniciar</button>
         </div>
       </div>
     </section>
 
-    <section id="upper" class="plan">
-      <div class="info">Upper / Lower: alterna torso y pierna. Domingo: descanso, caminar o movilidad suave.</div>
-
-      <div class="day">
-        <h2>Lunes · Upper A</h2>
-        <p>Torso completo</p>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#557886"/>
-              <path d="M39 34 Q50 27 61 34 V48 Q50 53 39 48 Z" fill="#ff4d59"/>
-              <ellipse cx="35" cy="37" rx="7" ry="8" fill="#ffb23e"/>
-              <ellipse cx="65" cy="37" rx="7" ry="8" fill="#ffb23e"/>
-              <rect x="24" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="66" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Press de banca con barra</h3>
-            <span class="sets">3 × 6–10</span>
-            <div class="muscle">🔥 Pecho · tríceps</div>
-            <p class="cue">Escápulas atrás y recorrido controlado.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/barbell-bench-press.html">▶ Ver vídeo</a>
-          </div>
-        </div>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#ff4d59"/>
-              <rect x="24" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="66" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Jalón al pecho</h3>
-            <span class="sets">3 × 8–12</span>
-            <div class="muscle">🔥 Dorsal · bíceps</div>
-            <p class="cue">Pecho alto y codos hacia abajo.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/wide-grip-pull-down">▶ Ver vídeo</a>
-          </div>
-        </div>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#557886"/>
-              <ellipse cx="35" cy="37" rx="7" ry="8" fill="#ff4d59"/>
-              <ellipse cx="65" cy="37" rx="7" ry="8" fill="#ff4d59"/>
-              <rect x="24" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-              <rect x="66" y="43" width="10" height="42" rx="5" fill="#ffb23e"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Press de hombro sentado</h3>
-            <span class="sets">3 × 8–12</span>
-            <div class="muscle">🔥 Hombro · tríceps</div>
-            <p class="cue">No arquees la zona lumbar.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/seated-dumbbell-press.html">▶ Ver vídeo</a>
-          </div>
+    <!-- SECCION: RUTINA -->
+    <section id="section-rutina" class="section">
+      <div class="card">
+        <h2>Rutinas</h2>
+        <p>Elige un plan y un día para ver o entrenar.</p>
+        <div style="display:grid;gap:8px;margin-top:8px;">
+          <button class="btn" data-plan="PPL" data-day="0">PPL — Lunes: Push A</button>
+          <button class="btn" data-plan="PPL" data-day="1">PPL — Martes: Pull A</button>
+          <button class="btn" data-plan="PPL" data-day="2">PPL — Miernes: Legs A</button>
+          <button class="btn" data-plan="PPL" data-day="3">PPL — Jueves: Push B</button>
+          <button class="btn" data-plan="PPL" data-day="4">PPL — Viernes: Pull B</button>
+          <button class="btn" data-plan="PPL" data-day="5">PPL — Sábado: Legs B</button>
+          <button class="btn secondary" data-plan="UL" data-day="0">Upper/Lower — Lunes: Upper A</button>
+          <button class="btn secondary" data-plan="UL" data-day="1">Upper/Lower — Martes: Lower A</button>
+          <button class="btn secondary" data-plan="UL" data-day="2">Upper/Lower — Miernes: Upper B</button>
+          <button class="btn secondary" data-plan="UL" data-day="3">Upper/Lower — Jueves: Lower B</button>
+          <button class="btn secondary" data-plan="UL" data-day="4">Upper/Lower — Viernes: Upper C</button>
+          <button class="btn secondary" data-plan="UL" data-day="5">Upper/Lower — Sábado: Lower C</button>
         </div>
       </div>
 
-      <div class="day">
-        <h2>Martes · Lower A</h2>
-        <p>Cuádriceps y glúteo</p>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#557886"/>
-              <ellipse cx="42" cy="70" rx="8" ry="7" fill="#ffb23e"/>
-              <ellipse cx="58" cy="70" rx="8" ry="7" fill="#ffb23e"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#ff4d59"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#ff4d59"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Sentadilla con barra</h3>
-            <span class="sets">3 × 6–10</span>
-            <div class="muscle">🔥 Cuádriceps · glúteos</div>
-            <p class="cue">Abdomen firme y rodillas alineadas.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/squat.html">▶ Ver vídeo</a>
-          </div>
-        </div>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#557886"/>
-              <ellipse cx="42" cy="70" rx="8" ry="7" fill="#ff4d59"/>
-              <ellipse cx="58" cy="70" rx="8" ry="7" fill="#ff4d59"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#ff4d59"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#ff4d59"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Peso muerto rumano</h3>
-            <span class="sets">3 × 8–12</span>
-            <div class="muscle">🔥 Femoral · glúteos</div>
-            <p class="cue">Cadera atrás y espalda neutra.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/romanian-deadlift">▶ Ver vídeo</a>
-          </div>
-        </div>
-
-        <div class="exercise">
-          <div class="figure">
-            <svg viewBox="0 0 100 150" width="82" height="120">
-              <circle cx="50" cy="14" r="10" fill="#cbd9de"/>
-              <rect x="37" y="27" width="26" height="38" rx="10" fill="#557886"/>
-              <rect x="37" y="77" width="12" height="34" rx="6" fill="#ff4d59"/>
-              <rect x="51" y="77" width="12" height="34" rx="6" fill="#ff4d59"/>
-            </svg>
-          </div>
-          <div class="detail">
-            <h3>Extensión de cuádriceps</h3>
-            <span class="sets">3 × 12–15</span>
-            <div class="muscle">🔥 Cuádriceps</div>
-            <p class="cue">Sin rebotes y con control.</p>
-            <a class="video" target="_blank" href="https://www.muscleandstrength.com/exercises/leg-extension.html">▶ Ver vídeo</a>
-          </div>
-        </div>
-      </div>
+      <div id="routineDetail"></div>
     </section>
-  </main>
 
-  <script>
-    function showPlan(id, button) {
-      document.querySelectorAll(".plan").forEach(function(plan) {
-        plan.classList.remove("active");
-      });
-      document.querySelectorAll(".tab").forEach(function(tab) {
-        tab.classList.remove("active");
-      });
-      document.getElementById(id).classList.add("active");
-      button.classList.add("active");
-      window.scrollTo(0, 0);
-    }
-  </script>
-</body>
-</html>
-
-
+    <!-- SECCION: PROGRESO -->
+    <section id="section-progreso" class="section">
+      <div class="card">
+        <h2>Resumen de la semana</h2>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="value" id="sumDays">0 / 6</div>
+            <div class="label">Dias completado
