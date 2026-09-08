@@ -317,4 +317,1179 @@
         <div class="summary-grid">
           <div class="summary-item">
             <div class="value" id="sumDays">0 / 6</div>
-            <div class="label">Dias completado
+            <div class="label">Dias completados</div>
+          </div>
+          <div class="summary-item">
+            <div class="value" id="sumSets">0</div>
+            <div class="label">Series completadas</div>
+          </div>
+          <div class="summary-item">
+            <div class="value" id="sumVolume">0 kg</div>
+            <div class="label">Volumen total</div>
+          </div>
+          <div class="summary-item">
+            <div class="value" id="sumWorkouts">0</div>
+            <div class="label">Entrenamientos</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:12px;">Series por grupo muscular</h3>
+        <div class="muscle-list" id="muscleList"></div>
+      </div>
+
+      <div class="card">
+        <h3>Exportar / Importar</h3>
+        <p>Guarda una copia de tus datos o restáııralos.</p>
+        <div class="export-area">
+          <button id="exportData">Exportar datos (JSON)</button>
+          <button id="importData">Importar datos (JSON)</button>
+          <button id="resetWeek">Reiniciar semana actual</button>
+        </div>
+        <input type="file" id="importFile" accept=".json" style="display:none;" />
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="active" data-section="hoy">Hoy</button>
+    <button data-section="rutina">Rutina</button>
+    <button data-section="progreso">Progreso</button>
+  </nav>
+
+  <script>
+    // =========================
+    // DATOS DE RUTINAS
+    // =========================
+    const routines = {
+      PPL: [
+        {
+          name: "Push A",
+          focus: "Pecho, hombro y tríceps",
+          muscles: ["Pecho","Hombro","Triceps"],
+          exercises: [
+            {
+              name: "Press de banca con barra",
+              video: "https://www.youtube.com/watch?v=rT7DgCr-3pg",
+              thumb: "Pecho principal",
+              alt: "Press con mancuernas en banco plano",
+              sets: 3
+            },
+            {
+              name: "Press inclinado con mancuernas",
+              video: "https://www.youtube.com/watch?v=4B9C1vY4F3Q",
+              thumb: "Pecho superior",
+              alt: "Press inclinado en máquina o con barra",
+              sets: 3
+            },
+            {
+              name: "Aperturas en polea o con mancuernas",
+              video: "https://www.youtube.com/watch?v=3c8G9fQ6k6Y",
+              thumb: "Pecho (aislamiento)",
+              alt: "Cruce de poleas o press en máquina",
+              sets: 3
+            },
+            {
+              name: "Press militar con mancuernas",
+              video: "https://www.youtube.com/watch?v=qEwKCRXJ6IY",
+              thumb: "Hombro",
+              alt: "Press militar con barra o en máquina",
+              sets: 3
+            },
+            {
+              name: "Elevaciones laterales",
+              video: "https://www.youtube.com/watch?v=3VcKaXpzqRo",
+              thumb: "Hombro lateral",
+              alt: "Elevaciones en polea o máquina",
+              sets: 3
+            },
+            {
+              name: "Fondos en paralelas (o press cerrado)",
+              video: "https://www.youtube.com/watch?v=2z8JmcrK-As",
+              thumb: "Triceps y pecho inferior",
+              alt: "Extensones de tríceps en polea",
+              sets: 3
+            },
+            {
+              name: "Extensones de tríceps en polea",
+              video: "https://www.youtube.com/watch?v=6jC2D0RfX8I",
+              thumb: "Triceps",
+              alt: "Rompecrá¬¬neos con barra o mancuernas",
+              sets: 3
+            }
+          ]
+        },
+        {
+          name: "Pull A",
+          focus: "Espalda y bíceps",
+          muscles: ["Espalda","Biceps"],
+          exercises: [
+            {
+              name: "Jalones al pecho (agarre medio)",
+              video: "https://www.youtube.com/watch?v=CAwf7n6Luuc",
+              thumb: "Espalda ancha",
+              alt: "Dominadas asistidas o jalones con agarre diferente",
+              sets: 3
+            },
+            {
+              name: "Remo con barra",
+              video: "https://www.youtube.com/watch?v=IhgxFv2bJqY",
+              thumb: "Espalda media",
+              alt: "Remo con mancuerna a una mano",
+              sets: 3
+            },
+            {
+              name: "Remo en polea baja",
+              video: "https://www.youtube.com/watch?v=grTt10vNyAA",
+              thumb: "Espalda media-baja",
+              alt: "Remo en máquina o con mancuernas",
+              sets: 3
+            },
+            {
+              name: "Face pull",
+              video: "https://www.youtube.com/watch?v=HcM7gMEJbN0",
+              thumb: "Hombro posterior / trapecio",
+              alt: "Pá¬¡jaros en polea o con mancuernas",
+              sets: 3
+            },
+            {
+              name: "Curl de bíceps con barra",
+              video: "https://www.youtube.com/watch?v=k3CZlTlVq9k",
+              thumb: "Biceps",
+              alt: "Curl con mancuernas o en polea",
+              sets: 3
+            },
+            {
+              name: "Curl martillo",
+              video: "https://www.youtube.com/watch?v=TwD-8q8vFA0",
+              thumb: "Biceps y antebrazo",
+              alt: "Curl en polea con cuerda",
+              sets: 3
+            },
+            {
+              name: "Curl de antebrazo con barra (pronado)",
+              video: "https://www.youtube.com/watch?v=8hABoZKXiGU",
+              thumb: "Antebrazo",
+              alt: "Curl de muñeca con mancuerna",
+              sets: 3
+            },
+            {
+              name: "Curl de muñeca (flexores)",
+              video: "https://www.youtube.com/watch?v=W_kqXeJvIhI",
+              thumb: "Antebrazo / muñeca",
+              alt: "Curl de muñeca con barra",
+              sets: 3
+            }
+          ]
+        },
+        {
+          name: "Legs A",
+          focus: "Cuá¬¡driceps y cadena posterior",
+          muscles: ["Cuadriceps","Femoral","Gluteo","Gemelo","Abdomen"],
+          exercises: [
+            {
+              name: "Sentadilla con barra",
+              video: "https://www.youtube.com/watch?v=SW_C1A-rejs",
+              thumb: "Cuá¬¡driceps / gluteo",
+              alt: "Sentadilla goblet con mancuerna",
+              sets: 3
+            },
+            {
+              name: "Prensa o zancadas con mancuernas",
+              video: "https://www.youtube.com/watch?v=Q7YJZcD4a5M",
+              thumb: "Cuá¬¡driceps",
+              alt: "Step-ups o sentadilla búlgara",
+              sets: 3
+            },
+            {
+              name: "Peso muerto rumano",
+              video: "https://www.youtube.com/watch?v=ogfRc1ZUgqo",
+              thumb: "Femoral / gluteo",
+              alt: "Peso muerto con mancuernas",
+              sets: 3
+            },
+            {
+              name: "Curl femoral en máquina o con mancuerna",
+              video: "https://www.youtube.com/watch?v=1Tq3QdYUuHs",
+              thumb: "Femoral",
+              alt: "Nordic curl asistido o buen día",
+              sets: 3
+            },
+            {
+              name: "Elevaciones de gemelo de pie",
+              video: "https://www.youtube.com/watch?v=7U2cXPkNveA",
+              thumb: "Gemelo",
+              alt: "Elevaciones en máquina o a una pierna",
+              sets: 3
+            },
+            {
+              name: "Plancha abdominal",
+              video: "https://www.youtube.com/watch?v=ASdvN_XEl_c",
+              thumb: "Abdomen",
+              alt: "Crunch o hollow hold",
+              sets: 3
+            }
+          ]
+        },
+        {
+          name: "Push B",
+          focus: "Hombro, pecho y tríceps (enfoque diferente)",
+          muscles: ["Hombro","Pecho","Triceps"],
+          exercises: [
+            {
+              name: "Press militar con barra",
+              video: "https://www.youtube.com/watch?v=2yjwXTZQDDI",
+              thumb: "Hombro",
+              alt: "Press militar con mancuernas",
+              sets: 3
+            },
+            {
+              name: "Press plano con mancuernas",
+              video: "https://www.youtube.com/watch?v=VmB1G1K7v94",
+              thumb: "Pecho",
+              alt: "Press en máquina o con barra",
+              sets: 3
+            },
+            {
+              name: "Press declinado o fondos",
+              video: "https://www.youtube.com/watch?v=2z8JmcrK-As",
+              thumb: "Pecho inferior",
+              alt: "Press cerrado o aperturas",
+              sets: 3
+            },
+            {
+              name: "Elevaciones laterales en polea",
+              video: "https://www.youtube.com/watch?v=qEwKCRXJ6IY",
+              thumb: "Hombro lateral",
+              alt: "Elevaciones con mancuernas",
+              sets: 3
+            },
+            {
+              name: "Pá¬¡jaros / face pull ligero",
+              video: "https://www.youtube.com/watch?v=HcM7gMEJbN0",
+              thumb: "Hombro posterior",
+              alt: "Remo al cuello suave",
+              sets: 3
+            },
+            {
+              name: "Extensones de tríceps tras nuca",
+              video: "https://www.youtube.com/watch?v=6jC2D0RfX8I",
+              thumb: "Triceps",
+              alt: "Fondos o polea",
+              sets: 3
+            },
+            {
+              name: "Curl de antebrazo con mancuerna (supinado)",
+              video: "https://www.youtube.com/watch?v=8hABoZKXiGU",
+              thumb: "Antebrazo",
+              alt: "Curl de muñeca con barra",
+              sets: 3
+            },
+            {
+              name: "Curl de muñeca (extensores)",
+              video: "https://www.youtube.com/watch?v=W_kqXeJvIhI",
+              thumb: "Antebrazo / muñeca",
+              alt: "Curl inverso con barra",
+              sets: 3
+            }
+          ]
+        },
+        {
+          name: "Pull B",
+          focus: "Espalda y bíceps (variaciones)",
+          muscles: ["Espalda","Biceps"],
+          exercises: [
+            {
+              name: "Dominadas o jalones agarre supino",
+              video: "https://www.youtube.com/watch?v=eGo4IYlbE5g",
+              thumb: "Espalda ancha",
+              alt: "Jalones con agarre neutro",
+              sets: 3
+            },
+            {
+              name: "Remo con mancuerna a una mano",
+              video: "https://www.youtube.com/watch?v=5yDhUqfK6hU",
+              thumb: "Espalda media",
+              alt: "Remo con barra o en máquina",
+              sets: 3
+            },
+            {
+              name: "Remo invertido o en anillas/TRX",
+              video: "https://www.youtube.com/watch?v=6p8YFz9D3hU",
+              thumb: "Espalda media",
+              alt: "Remo en polea baja",
+              sets: 3
+            },
+            {
+              name: "Encogimientos de hombros (trapecio)",
+              video: "https://www.youtube.com/watch?v=M3FA5Aw7mHc",
+              thumb: "Trapecio",
+              alt: "Remo al cuello ligero",
+              sets: 3
+            },
+            {
+              name: "Curl predicador o con apoyo",
+              video: "https://www.youtube.com/watch?v=4DwHvW3zq9A",
+              thumb: "Biceps",
+              alt: "Curl en polea con barra",
+              sets: 3
+            },
+            {
+              name: "Curl concentrado",
+              video: "https://www.youtube.com/watch?v=JgCHN7n7X3I",
+              thumb: "Biceps",
+              alt: "Curl en banco inclinado",
+              sets: 3
+            },
+            {
+              name: "Curl de antebrazo en banco (pronado)",
+              video: "https://www.youtube.com/watch?v=8hABoZKXiGU",
+              thumb: "Antebrazo",
+              alt: "Curl de muñeca con mancuerna",
+              sets: 3
+            },
+            {
+              name: "Curl de muñeca con mancuerna (flexores)",
+              video: "https://www.youtube.com/watch?v=W_kqXeJvIhI",
+              thumb: "Antebrazo / muñeca",
+              alt: "Curl de muñeca con barra",
+              sets: 3
+            }
+          ]
+        },
+        {
+          name: "Legs B",
+          focus: "Gluteo, femoral, gemelo y abdomen",
+          muscles: ["Gluteo","Femoral","Gemelo","Abdomen"],
+          exercises: [
+            {
+              name: "Hip thrust o puente de gluteo",
+              video: "https://www.youtube.com/watch?v=GLD3n5v3xMw",
+              thumb: "Gluteo",
+              alt: "Puente a una pierna o peso muerto",
+              sets: 3
+            },
+            {
+              name: "Sentadilla búlgara",
+              video: "https://www.youtube.com/watch?v=5yvXp8lYd4g",
+              thumb: "Gluteo / cuá¬¡driceps",
+              alt: "Zancadas o step-ups",
+              sets: 3
+            },
+            {
+              name: "Peso muerto rumano con mancuernas",
+              video: "https://www.youtube.com/watch?v=ogfRc1ZUgqo",
+              thumb: "Femoral / gluteo",
+              alt: "Buen día o curl femoral",
+              sets: 3
+            },
+            {
+              name: "Curl femoral tumbado o sentado",
+              video: "https://www.youtube.com/watch?v=1Tq3QdYUuHs",
+              thumb: "Femoral",
+              alt: "Nordic o deslizamientos",
+              sets: 3
+            },
+            {
+              name: "Elevaciones de gemelo sentado",
+              video: "https://www.youtube.com/watch?v=7U2cXPkNveA",
+              thumb: "Gemelo",
+              alt: "Elevaciones de pie o en máquina",
+              sets: 3
+            },
+            {
+              name: "Crunch o elevaciones de piernas",
+              video: "https://www.youtube.com/watch?v=Xyd_fa5zoEU",
+              thumb: "Abdomen",
+              alt: "Plancha o rueda abdominal",
+              sets: 3
+            }
+          ]
+        }
+      ],
+      UL: [
+        {
+          name: "Upper A",
+          focus: "Empuje y tracció¬¡·n superior",
+          muscles: ["Pecho","Espalda","Hombro","Biceps","Triceps"],
+          exercises: [
+            {
+              name: "Press de banca con barra",
+              video: "https://www.youtube.com/watch?v=rT7DgCr-3pg",
+              thumb: "Pecho",
+              alt: "Press con mancuernas",
+              sets: 3
+            },
+            {
+              name: "Remo con barra",
+              video: "https://www.youtube.com/watch?v=IhgxFv2bJqY",
+              thumb: "Espalda",
+              alt: "Remo con mancuerna",
+              sets: 3
+            },
+            {
+              name: "Press militar con mancuernas",
+              video: "https://www.youtube.com/watch?v=qEwKCRXJ6IY",
+              thumb: "Hombro",
+              alt: "Press militar con barra",
+              sets: 3
+            },
+            {
+              name: "Jalones al pecho",
+              video: "https://www.youtube.com/watch?v=CAwf7n6Luuc",
+              thumb: "Espalda",
+              alt: "Dominadas asistidas",
+              sets: 3
+            },
+            {
+              name: "Curl de bíceps con barra",
+              video: "https://www.youtube.com/watch?v=k3CZlTlVq9k",
+              thumb: "Biceps",
+              alt: "Curl con mancuernas",
+              sets: 3
+            },
+            {
+              name: "Extensones de tríceps en polea",
+              video: "https://www.youtube.com/watch?v=6jC2D0RfX8I",
+              thumb: "Triceps",
+              alt: "Fondos o rompecrá¬¬neos",
+              sets: 3
+            },
+            {
+              name: "Curl de antebrazo con barra",
+              video: "https://www.youtube.com/watch?v=8hABoZKXiGU",
+              thumb: "Antebrazo",
+              alt: "Curl de muñeca",
+              sets: 3
+            },
+            {
+              name: "Curl de muñeca (flexores)",
+              video: "https://www.youtube.com/watch?v=W_kqXeJvIhI",
+              thumb: "Antebrazo / muñeca",
+              alt: "Curl de muñeca con mancuerna",
+              sets: 3
+            }
+          ]
+        },
+        {
+          name: "Lower A",
+          focus: "Cuá¬¡driceps y cadena posterior",
+          muscles: ["Cuadriceps","Femoral","Gluteo","Gemelo","Abdomen"],
+          exercises: [
+            {
+              name: "Sentadilla con barra",
+              video: "https://www.youtube.com/watch?v=SW_C1A-rejs",
+              thumb: "Cuá¬¡driceps",
+              alt: "Sentadilla goblet",
+              sets: 3
+            },
+            {
+              name: "Peso muerto rumano",
+              video: "https://www.youtube.com/watch?v=ogfRc1ZUgqo",
+              thumb: "Femoral / gluteo",
+              alt: "Peso muerto con mancuernas",
+              sets: 3
+            },
+            {
+              name: "Prensa o zancadas",
+              video: "https://www.youtube.com/watch?v=Q7YJZcD4a5M",
+              thumb: "Cuá¬¡driceps",
+              alt: "Step-ups",
+              sets: 3
+            },
+            {
+              name: "Curl femoral",
+              video: "https://www.youtube.com/watch?v=1Tq3QdYUuHs",
+              thumb: "Femoral",
+              alt: "Nordic asistido",
+              sets: 3
+            },
+            {
+              name: "Elevaciones de gemelo",
+              video: "https://www.youtube.com/watch?v=7U2cXPkNveA",
+              thumb: "Gemelo",
+              alt: "Elevaciones a una pierna",
+              sets: 3
+            },
+            {
+              name: "Plancha",
+              video: "https://www.youtube.com/watch?v=ASdvN_XEl_c",
+              thumb: "Abdomen",
+              alt: "Crunch",
+              sets: 3
+            }
+          ]
+        },
+        {
+          name: "Upper B",
+          focus: "Variaciones de empuje y tracció¬¡·n",
+          muscles: ["Pecho","Espalda","Hombro","Biceps","Triceps"],
+          exercises: [
+            {
+              name: "Press inclinado con mancuernas",
+              video: "https://www.youtube.com/watch?v=4B9C1vY4F3Q",
+              thumb: "Pecho superior",
+              alt: "Press en máquina",
+              sets: 3
+            },
+            {
+              name: "Remo con mancuerna a una mano",
+              video: "https://www.youtube.com/watch?v=5yDhUqfK6hU",
+              thumb: "Espalda",
+              alt: "Remo en polea",
+              sets: 3
+            },
+            {
+              name: "Press militar con barra",
+              video: "https://www.youtube.com/watch?v=2yjwXTZQDDI",
+              thumb: "Hombro",
+              alt: "Press con mancuernas",
+              sets: 3
+            },
+            {
+              name: "Dominadas o jalones supino",
+              video: "https://www.youtube.com/watch?v=eGo4IYlbE5g",
+              thumb: "Espalda",
+              alt: "Jalones agarre neutro",
+              sets: 3
+            },
+            {
+              name: "Curl martillo",
+              video: "https://www.youtube.com/watch?v=TwD-8q8vFA0",
+              thumb: "Biceps / antebrazo",
+              alt: "Curl en polea",
+              sets: 3
+            },
+            {
+              name: "Fondos o press cerrado",
+              video: "https://www.youtube.com/watch?v=2z8JmcrK-As",
+              thumb: "Triceps",
+              alt: "Extensones en polea",
+              sets: 3
+            },
+            {
+              name: "Curl de antebrazo (supinado)",
+              video: "https://www.youtube.com/watch?v=8hABoZKXiGU",
+              thumb: "Antebrazo",
+              alt: "Curl de muñeca",
+              sets: 3
+            },
+            {
+              name: "Curl de muñeca (extensores)",
+              video: "https://www.youtube.com/watch?v=W_kqXeJvIhI",
+              thumb: "Antebrazo / muñeca",
+              alt: "Curl inverso",
+              sets: 3
+            }
+          ]
+        },
+        {
+          name: "Lower B",
+          focus: "Gluteo y femoral",
+          muscles: ["Gluteo","Femoral","Cuadriceps","Gemelo","Abdomen"],
+          exercises: [
+            {
+              name: "Hip thrust",
+              video: "https://www.youtube.com/watch?v=GLD3n5v3xMw",
+              thumb: "Gluteo",
+              alt: "Puente de gluteo",
+              sets: 3
+            },
+            {
+              name: "Sentadilla búlgara",
+              video: "https://www.youtube.com/watch?v=5yvXp8lYd4g",
+              thumb: "Gluteo / cuá¬¡driceps",
+              alt: "Zancadas",
+              sets: 3
+            },
+            {
+              name: "Peso muerto rumano con mancuernas",
+              video: "https://www.youtube.com/watch?v=ogfRc1ZUgqo",
+              thumb: "Femoral / gluteo",
+              alt: "Buen día",
+              sets: 3
+            },
+            {
+              name: "Curl femoral",
+              video: "https://www.youtube.com/watch?v=1Tq3QdYUuHs",
+              thumb: "Femoral",
+              alt: "Nordic",
+              sets: 3
+            },
+            {
+              name: "Elevaciones de gemelo",
+              video: "https://www.youtube.com/watch?v=7U2cXPkNveA",
+              thumb: "Gemelo",
+              alt: "Elevaciones sentado",
+              sets: 3
+            },
+            {
+              name: "Elevaciones de piernas",
+              video: "https://www.youtube.com/watch?v=Xyd_fa5zoEU",
+              thumb: "Abdomen",
+              alt: "Crunch",
+              sets: 3
+            }
+          ]
+        },
+        {
+          name: "Upper C",
+          focus: "Volumen y detalles",
+          muscles: ["Pecho","Espalda","Hombro","Biceps","Triceps"],
+          exercises: [
+            {
+              name: "Press plano con mancuernas",
+              video: "https://www.youtube.com/watch?v=VmB1G1K7v94",
+              thumb: "Pecho",
+              alt: "Press en máquina",
+              sets: 3
+            },
+            {
+              name: "Remo en polea baja",
+              video: "https://www.youtube.com/watch?v=grTt10vNyAA",
+              thumb: "Espalda",
+              alt: "Remo con mancuerna",
+              sets: 3
+            },
+            {
+              name: "Elevaciones laterales",
+              video: "https://www.youtube.com/watch?v=3VcKaXpzqRo",
+              thumb: "Hombro lateral",
+              alt: "Elevaciones en polea",
+              sets: 3
+            },
+            {
+              name: "Face pull",
+              video: "https://www.youtube.com/watch?v=HcM7gMEJbN0",
+              thumb: "Hombro posterior",
+              alt: "Pá¬¡jaros",
+              sets: 3
+            },
+            {
+              name: "Curl predicador",
+              video: "https://www.youtube.com/watch?v=4DwHvW3zq9A",
+              thumb: "Biceps",
+              alt: "Curl concentrado",
+              sets: 3
+            },
+            {
+              name: "Extensones tras nuca",
+              video: "https://www.youtube.com/watch?v=6jC2D0RfX8I",
+              thumb: "Triceps",
+              alt: "Fondos",
+              sets: 3
+            },
+            {
+              name: "Curl de antebrazo en banco",
+              video: "https://www.youtube.com/watch?v=8hABoZKXiGU",
+              thumb: "Antebrazo",
+              alt: "Curl de muñeca",
+              sets: 3
+            },
+            {
+              name: "Curl de muñeca con mancuerna",
+              video: "https://www.youtube.com/watch?v=W_kqXeJvIhI",
+              thumb: "Antebrazo / muñeca",
+              alt: "Curl de muñeca con barra",
+              sets: 3
+            }
+          ]
+        },
+        {
+          name: "Lower C",
+          focus: "Pierna completa",
+          muscles: ["Cuadriceps","Femoral","Gluteo","Gemelo","Abdomen"],
+          exercises: [
+            {
+              name: "Sentadilla con barra",
+              video: "https://www.youtube.com/watch?v=SW_C1A-rejs",
+              thumb: "Cuá¬¡driceps",
+              alt: "Sentadilla goblet",
+              sets: 3
+            },
+            {
+              name: "Prensa o zancadas",
+              video: "https://www.youtube.com/watch?v=Q7YJZcD4a5M",
+              thumb: "Cuá¬¡driceps",
+              alt: "Step-ups",
+              sets: 3
+            },
+            {
+              name: "Peso muerto rumano",
+              video: "https://www.youtube.com/watch?v=ogfRc1ZUgqo",
+              thumb: "Femoral / gluteo",
+              alt: "Peso muerto con mancuernas",
+              sets: 3
+            },
+            {
+              name: "Curl femoral",
+              video: "https://www.youtube.com/watch?v=1Tq3QdYUuHs",
+              thumb: "Femoral",
+              alt: "Nordic",
+              sets: 3
+            },
+            {
+              name: "Elevaciones de gemelo",
+              video: "https://www.youtube.com/watch?v=7U2cXPkNveA",
+              thumb: "Gemelo",
+              alt: "Elevaciones sentado",
+              sets: 3
+            },
+            {
+              name: "Plancha + crunch",
+              video: "https://www.youtube.com/watch?v=ASdvN_XEl_c",
+              thumb: "Abdomen",
+              alt: "Elevaciones de piernas",
+              sets: 3
+            }
+          ]
+        }
+      ]
+    };
+
+    const dayNames = ["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado","Domingo"];
+
+    // =========================
+    // ESTADO Y ALMACENAMIENTO
+    // =========================
+    let currentWeekOffset = 0; // 0 = semana actual, -1 anterior, +1 siguiente
+    let currentSection = "hoy";
+    let currentPlan = "PPL";
+    let currentDayIndex = new Date().getDay(); // 0=domingo...6=sabado
+    if (currentDayIndex === 0) currentDayIndex = 6; else currentDayIndex -= 1; // 0=lunes...6=domingo
+
+    function getWeekKey(offset) {
+      const now = new Date();
+      const day = now.getDay(); // 0 dom ... 6 sab
+      const diffToMonday = day === 0 ? -6 : 1 - day;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() + diffToMonday + offset * 7);
+      return monday.toISOString().slice(0,10); // YYYY-MM-DD del lunes
+    }
+
+    function loadData() {
+      const raw = localStorage.getItem("gymDataV1");
+      if (!raw) return {};
+      try { return JSON.parse(raw); } catch { return {}; }
+    }
+
+    function saveData(data) {
+      localStorage.setItem("gymDataV1", JSON.stringify(data));
+    }
+
+    function ensureWeekData(data, weekKey) {
+      if (!data[weekKey]) {
+        data[weekKey] = {
+          completedDays: {}, // "PPL-0": true
+          exercises: {} // "PPL-0-0": { sets:[{w,r,done},{},{}], note:"" }
+        };
+      }
+      return data[weekKey];
+    }
+
+    // =========================
+    // UTILS
+    // =========================
+    function $(sel) { return document.querySelector(sel); }
+    function $all(sel) { return Array.from(document.querySelectorAll(sel)); }
+
+    function renderWeekGrid() {
+      const weekKey = getWeekKey(currentWeekOffset);
+      const data = loadData();
+      const weekData = ensureWeekData(data, weekKey);
+      const grid = $("#weekGrid");
+      grid.innerHTML = "";
+      for (let i=0;i<7;i++) {
+        const d = document.createElement("div");
+        d.className = "day-circle";
+        d.textContent = dayNames[i].slice(0,3);
+        if (i === currentDayIndex) d.classList.add("today");
+        // Marcamos como completado si hay al menos un ejercicio con alguna serie hecha
+        const anyDone = Object.keys(weekData.completedDays||{}).some(k => {
+          const [plan,day] = k.split("-");
+          return parseInt(day) === i && weekData.completedDays[k];
+        });
+        if (anyDone) d.classList.add("completed");
+        grid.appendChild(d);
+      }
+      $("#weekLabel").textContent = "Semana " + weekKey;
+    }
+
+    function getTodayPlanAndDay() {
+      // Por defecto PPL, pero si el usuario ya eligió···
+      const stored = localStorage.getItem("gymLastPlan");
+      if (stored) currentPlan = stored;
+      return { plan: currentPlan, day: currentDayIndex };
+    }
+
+    function buildExerciseCard(plan, dayIndex, exIndex, ex, weekData) {
+      const key = `${plan}-${dayIndex}-${exIndex}`;
+      const exData = weekData.exercises[key] || {
+        sets: [
+          { w:"", r:"", done:false },
+          { w:"", r:"", done:false },
+          { w:"", r:"", done:false }
+        ],
+        note: ""
+      };
+      weekData.exercises[key] = exData;
+
+      const card = document.createElement("div");
+      card.className = "exercise";
+
+      const header = document.createElement("div");
+      header.className = "exercise-header";
+
+      const thumb = document.createElement("div");
+      thumb.className = "muscle-thumb";
+      thumb.textContent = ex.thumb;
+      // Aquí podrí¬¡as poner una imagen real si la tuvieras
+      header.appendChild(thumb);
+
+      const title = document.createElement("div");
+      title.className = "exercise-title";
+      title.innerHTML = `<h3>${ex.name}</h3><p><a href="${ex.video}" target="_blank">Ver video</a> · ${ex.sets} series</p>`;
+      header.appendChild(title);
+
+      card.appendChild(header);
+
+      const setsDiv = document.createElement("div");
+      setsDiv.className = "sets";
+
+      for (let s=0;s<ex.sets;s++) {
+        const row = document.createElement("div");
+        row.className = "set-row";
+
+        const label = document.createElement("div");
+        label.className = "set-label";
+        label.textContent = s+1;
+        row.appendChild(label);
+
+        const wIn = document.createElement("input");
+        wIn.type = "number";
+        wIn.step = "0.5";
+        wIn.placeholder = "kg";
+        wIn.value = exData.sets[s].w || "";
+        wIn.addEventListener("input", () => {
+          exData.sets[s].w = wIn.value;
+          saveData(loadData());
+        });
+        row.appendChild(wIn);
+
+        const rIn = document.createElement("input");
+        rIn.type = "number";
+        rIn.step = "1";
+        rIn.placeholder = "reps";
+        rIn.value = exData.sets[s].r || "";
+        rIn.addEventListener("input", () => {
+          exData.sets[s].r = rIn.value;
+          saveData(loadData());
+        });
+        row.appendChild(rIn);
+
+        const check = document.createElement("button");
+        check.className = "check" + (exData.sets[s].done ? " done" : "");
+        check.textContent = exData.sets[s].done ? "✓" : "";
+        check.addEventListener("click", () => {
+          exData.sets[s].done = !exData.sets[s].done;
+          check.classList.toggle("done", exData.sets[s].done);
+          check.textContent = exData.sets[s].done ? "✓" : "";
+          saveData(loadData());
+          updateTodayProgress(plan, dayIndex, weekData);
+        });
+        row.appendChild(check);
+
+        const restBtn = document.createElement("button");
+        restBtn.className = "btn small secondary";
+        restBtn.textContent = "⏱";
+        restBtn.title = "Iniciar descanso 90 s";
+        restBtn.addEventListener("click", () => startTimer(90));
+        row.appendChild(restBtn);
+
+        setsDiv.appendChild(row);
+      }
+
+      card.appendChild(setsDiv);
+
+      const altBtn = document.createElement("button");
+      altBtn.className = "alt-btn";
+      altBtn.textContent = "Alternativa si la máquina está ocupada";
+      altBtn.addEventListener("click", () => {
+        altPanel.style.display = altPanel.style.display === "block" ? "none" : "block";
+      });
+      card.appendChild(altBtn);
+
+      const altPanel = document.createElement("div");
+      altPanel.className = "alt-panel";
+      altPanel.textContent = ex.alt;
+      card.appendChild(altPanel);
+
+      const note = document.createElement("textarea");
+      note.className = "note-area";
+      note.rows = 2;
+      note.placeholder = "Notas: RIR, molestias, qué cambiar la próxima vez...";
+      note.value = exData.note || "";
+      note.addEventListener("input", () => {
+        exData.note = note.value;
+        saveData(loadData());
+      });
+      card.appendChild(note);
+
+      return card;
+    }
+
+    function updateTodayProgress(plan, dayIndex, weekData) {
+      const prefix = `${plan}-${dayIndex}-`;
+      const keys = Object.keys(weekData.exercises).filter(k => k.startsWith(prefix));
+      let total = 0, done = 0;
+      keys.forEach(k => {
+        const ex = weekData.exercises[k];
+        ex.sets.forEach(s => {
+          total++;
+          if (s.done) done++;
+        });
+      });
+      const pct = total ? (done/total)*100 : 0;
+      $("#todayProgress").style.width = pct + "%";
+      $("#todayProgressText").textContent = `${done} / ${total} series completadas`;
+      // Marcar día como completado si al menos una serie hecha
+      const anyDone = done > 0;
+      const dayKey = `${plan}-${dayIndex}`;
+      if (anyDone) weekData.completedDays[dayKey] = true;
+      else delete weekData.completedDays[dayKey];
+      saveData(loadData());
+      renderWeekGrid();
+    }
+
+    function renderToday() {
+      const { plan, day } = getTodayPlanAndDay();
+      const weekKey = getWeekKey(currentWeekOffset);
+      const data = loadData();
+      const weekData = ensureWeekData(data, weekKey);
+
+      const routineList = routines[plan];
+      const todayRoutine = routineList[day];
+
+      $("#headerTitle").textContent = "Hoy";
+      $("#todayTitle").textContent = `${dayNames[day]} — ${todayRoutine.name}`;
+      $("#todayDesc").textContent = `${todayRoutine.focus} · ${todayRoutine.exercises.length} ejercicios`;
+
+      const container = $("#todayExercises");
+      container.innerHTML = "";
+
+      todayRoutine.exercises.forEach((ex, idx) => {
+        const card = buildExerciseCard(plan, day, idx, ex, weekData);
+        container.appendChild(card);
+      });
+
+      updateTodayProgress(plan, day, weekData);
+      renderWeekGrid();
+    }
+
+    function renderRoutineDetail(plan, dayIndex) {
+      const weekKey = getWeekKey(currentWeekOffset);
+      const data = loadData();
+      const weekData = ensureWeekData(data, weekKey);
+      const routine = routines[plan][dayIndex];
+
+      const container = $("#routineDetail");
+      container.innerHTML = "";
+
+      const header = document.createElement("div");
+      header.className = "card";
+      header.innerHTML = `<h2>${dayNames[dayIndex]} — ${routine.name}</h2><p>${routine.focus}</p>`;
+      container.appendChild(header);
+
+      routine.exercises.forEach((ex, idx) => {
+        const card = buildExerciseCard(plan, dayIndex, idx, ex, weekData);
+        container.appendChild(card);
+      });
+
+      currentPlan = plan;
+      localStorage.setItem("gymLastPlan", plan);
+      currentDayIndex = dayIndex;
+      currentSection = "hoy";
+      $all("nav.bottom-nav button").forEach(b => b.classList.toggle("active", b.dataset.section === "hoy"));
+      showSection("hoy");
+    }
+
+    function renderProgress() {
+      const weekKey = getWeekKey(currentWeekOffset);
+      const data = loadData();
+      const weekData = ensureWeekData(data, weekKey);
+
+      // Dias completados
+      const completedCount = Object.keys(weekData.completedDays||{}).length;
+      $("#sumDays").textContent = `${completedCount} / 6`;
+
+      // Series y volumen
+      let totalSets = 0, doneSets = 0, volume = 0;
+      Object.values(weekData.exercises||{}).forEach(ex => {
+        ex.sets.forEach(s => {
+          totalSets++;
+          if (s.done) {
+            doneSets++;
+            const w = parseFloat(s.w)||0;
+            const r = parseInt(s.r)||0;
+            volume += w * r;
+          }
+        });
+      });
+      $("#sumSets").textContent = doneSets;
+      $("#sumVolume").textContent = Math.round(volume) + " kg";
+      $("#sumWorkouts").textContent = completedCount;
+
+      // Series por grupo muscular (aproximado)
+      const muscleMap = {};
+      Object.keys(weekData.exercises||{}).forEach(k => {
+        const [plan, dayIdx, exIdx] = k.split("-").map((x,i)=> i<2?x:parseInt(x));
+        const exData = weekData.exercises[k];
+        const routine = routines[plan][dayIdx];
+        const ex = routine.exercises[exIdx];
+        const muscles = ex.thumb.split("/").map(s=>s.trim());
+        exData.sets.forEach(s => {
+          if (s.done) {
+            muscles.forEach(m => {
+              muscleMap[m] = (muscleMap[m]||0) + 1;
+            });
+          }
+        });
+      });
+      const muscleList = $("#muscleList");
+      muscleList.innerHTML = "";
+      Object.entries(muscleMap).sort((a,b)=>b[1]-a[1]).forEach(([m,count]) => {
+        const row = document.createElement("div");
+        row.className = "muscle-row";
+        row.innerHTML = `<span>${m}</span><span>${count} series</span>`;
+        muscleList.appendChild(row);
+      });
+    }
+
+    // =========================
+    // NAVEGACION
+    // =========================
+    function showSection(name) {
+      currentSection = name;
+      $all(".section").forEach(s => s.classList.toggle("active", s.id === "section-"+name));
+      $all("nav.bottom-nav button").forEach(b => b.classList.toggle("active", b.dataset.section === name));
+      if (name === "hoy") renderToday();
+      if (name === "progreso") renderProgress();
+    }
+
+    $all("nav.bottom-nav button").forEach(b => {
+      b.addEventListener("click", () => showSection(b.dataset.section));
+    });
+
+    $all("#section-rutina .btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const plan = btn.dataset.plan;
+        const day = parseInt(btn.dataset.day);
+        renderRoutineDetail(plan, day);
+      });
+    });
+
+    $("#prevWeek").addEventListener("click", () => {
+      currentWeekOffset--;
+      renderWeekGrid();
+      if (currentSection === "hoy") renderToday();
+      if (currentSection === "rutina") { /* no change */ }
+      if (currentSection === "progreso") renderProgress();
+    });
+
+    $("#nextWeek").addEventListener("click", () => {
+      currentWeekOffset++;
+      renderWeekGrid();
+      if (currentSection === "hoy") renderToday();
+      if (currentSection === "rutina") { /* no change */ }
+      if (currentSection === "progreso") renderProgress();
+    });
+
+    // =========================
+    // TEMPORIZADOR
+    // =========================
+    let timerInterval = null;
+    let timerSeconds = 0;
+
+    function startTimer(seconds) {
+      clearInterval(timerInterval);
+      timerSeconds = seconds;
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        timerSeconds--;
+        updateTimerDisplay();
+        if (timerSeconds <= 0) {
+          clearInterval(timerInterval);
+          alert("Descanso terminado");
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(timerSeconds/60).toString().padStart(2,"0");
+      const s = (timerSeconds%60).toString().padStart(2,"0");
+      $("#timerDisplay").textContent = `${m}:${s}`;
+    }
+
+    $("#startTimer90").addEventListener("click", () => startTimer(90));
+    $("#startTimer120").addEventListener("click", () => startTimer(120));
+    $("#resetTimer").addEventListener("click", () => {
+      clearInterval(timerInterval);
+      timerSeconds = 0;
+      updateTimerDisplay();
+    });
+
+    // =========================
+    // EXPORTAR / IMPORTAR / REINICIAR
+    // =========================
+    $("#exportData").addEventListener("click", () => {
+      const data = loadData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "gym-progreso.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    $("#importData").addEventListener("click", () => {
+      $("#importFile").click();
+    });
+
+    $("#importFile").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          saveData(data);
+          alert("Datos importados correctamente");
+          renderToday();
+          renderProgress();
+        } catch {
+          alert("Error al importar: archivo no válido");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    $("#resetWeek").addEventListener("click", () => {
+      if (!confirm("Reiniciar semana actual: se borrará¬¡n las series completadas de esta semana, pero se mantendrá¬¡ el historial de semanas anteriores. ¿Continuar?")) return;
+      const weekKey = getWeekKey(currentWeekOffset);
+      const data = loadData();
+      data[weekKey] = { completedDays: {}, exercises: {} };
+      saveData(data);
+      renderToday();
+      renderProgress();
+    });
+
+    // =========================
+    // INICIALIZACION
+    // =========================
+    (function init() {
+      renderToday();
+      showSection("hoy");
+    })();
+  </script>
+</body>
+</html>
